@@ -53,13 +53,3 @@ result = recipe_chain.invoke(dish="Spagetti", ingredient_count="Five")
 pprint(result)
 
 # pprint(llm.invoke("what is the capital of france"))
-
-# generate = pipeline("text-generation", "HuggingFaceTB/SmolLM-135M-Instruct")
-
-#messages = [
-#  { "role": "system", "content": "You're a concise and witty AI tutor"},
-#  { "role": "user", "content": "Explain what a token is in NLP using cooking metaphores"}
-#]
-
-
-#"Give me a quick 2-step recipe for a {dish} using only {}"
