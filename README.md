@@ -2,6 +2,7 @@
 
 ╰─$ uv add transformers torch
 
+╰─$ uv add pydantic
 
 Deeper: 
 
