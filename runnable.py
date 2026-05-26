@@ -97,9 +97,23 @@ incoming_ticket = TicketInput(
   customer_id=1337,
   message="the payment portal is bokren urgent fix is needed asap!"
 )
+"""return  'urgency': 'high'}}"""
+
+
+"""incoming_ticket = TicketInput(
+  customer_id=33,
+  message="ni suger"
+)"""
+
+"""return  'urgency': 'low'}}"""
 
 final_output = ticket_pipeline.invoke(incoming_ticket)
+
+print("--- PIPELINE EXECUTED SUCCESSFULLY ---")
 pprint(final_output)
+
+print("--- INSIGHT ---")
+pprint(ticket_pipeline.model_dump(exclude_none=True))
 
 
 class SmolLM:
