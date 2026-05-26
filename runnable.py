@@ -34,7 +34,7 @@ class Runnable(BaseModel):
 class RunnableLamda(Runnable):
   func: Callable[[Any], Any]
 
-  def invoke(self, data: Any) -> Callable[[Any], Any]:
+  def invoke(self, data: Any) -> Any:
     return self.func(data)
 
 class RunnableSequence(Runnable):
@@ -42,9 +42,64 @@ class RunnableSequence(Runnable):
   second: Runnable
 
   def invoke(self, data: Any) -> Any:
-    return self.second.invoke(data)
+    intermediate = self.first.invoke(data)
+    return self.second.invoke(intermediate)
 
 
+class TicketInput(BaseModel):
+  customer_id: int
+  message: str
+
+
+class ProcessedTicket(BaseModel):
+  customer_id: int
+  sentiment: str
+  urgency: str
+  summary: str
+
+
+class SentimentAnalyser(Runnable):
+  name: str = "ticket_parser"
+  model_version: str = "2.1-stable"
+
+  def invoke(self, ticket: TicketInput) -> dict:
+    msg_lower = ticket.message.lower()
+
+    sentiment = "negative" if "broken" in msg_lower or "angry" in msg_lower else "neutral"
+    urgency = "high" if "broken" in msg_lower or "urgent" in msg_lower else "low"
+
+    return {
+      "customer_id": ticket.customer_id,
+      "sentiment": sentiment,
+      "urgency": urgency,
+      "summary": ticket.message[:40] + "..."
+    }
+
+
+class TicketParser(Runnable):
+  def invoke(self, raw_dict: dict) -> ProcessedTicket:
+    return ProcessedTicket(**raw_dict)
+
+
+class RouteTicket(Runnable):
+  def invoke(self, ticket: ProcessedTicket) -> dict:
+    destination = "engineering_team" if ticket.urgency == "high" else "general_support"
+    return {
+      "status": "routed",
+      "assigned_to": destination,
+      "ticket_details": ticket.model_dump()
+    }
+
+
+ticket_pipeline = SentimentAnalyser() | TicketParser() | RouteTicket()
+
+incoming_ticket = TicketInput(
+  customer_id=1337,
+  message="the payment portal is bokren urgent fix is needed asap!"
+)
+
+final_output = ticket_pipeline.invoke(incoming_ticket)
+pprint(final_output)
 
 
 class SmolLM:
@@ -86,16 +141,3 @@ class LLMChain:
   def invoke(self, **kwargs):
     formatted_prompt = self.prompt_template.format(**kwargs)
     return self.llm.invoke(formatted_prompt)
-
-llm = SmolLM()
-
-recipe_template = PromptTemplate(
-  template_str="Give me a quick 2-step recipe for a {dish} using only {ingredient_count} ingredients."
-)
-
-recipe_chain = recipe_template | llm
-
-result = recipe_chain.invoke(dish="Spagetti", ingredient_count="Five")
-pprint(result)
-
-# pprint(llm.invoke("what is the capital of france"))
