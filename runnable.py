@@ -2,11 +2,16 @@ from typing import Any, Callable
 from transformers import pipeline
 from pprint import pprint
 
-from pydantic import BaseModel, ConfigDict, SerializeAsAny
+from pydantic import BaseModel, ConfigDict, SerializeAsAny, computed_field
 
 class Runnable(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
-    
+
+    @computed_field
+    @property
+    def type(self) -> str:
+        return self.__class__.__name__
+
     def invoke(self, data: Any) -> Any:
       raise NotImplementedError("Iam not implemented! :o")
     
@@ -38,8 +43,8 @@ class RunnableLamda(Runnable):
     return self.func(data)
 
 class RunnableSequence(Runnable):
-  first: Runnable
-  second: Runnable
+  first: SerializeAsAny[Runnable]
+  second: SerializeAsAny[Runnable]
 
   def invoke(self, data: Any) -> Any:
     intermediate = self.first.invoke(data)
@@ -59,7 +64,7 @@ class ProcessedTicket(BaseModel):
 
 
 class SentimentAnalyser(Runnable):
-  name: str = "ticket_parser"
+  name: str = "sentiment"
   model_version: str = "2.1-stable"
 
   def invoke(self, ticket: TicketInput) -> dict:

@@ -6,6 +6,8 @@
 
 Deeper: 
 
+LangChain
+
 Overloading, t.ex. vectors
 
 Reminder:
