@@ -21,7 +21,7 @@ class PromptTemplate:
     return self.template_str.format(**kwargs)
     
 
-  def __or__(self, other):
+  def __or__(self, other):          # Overloading.
     if isinstance(other, SmolLM):
       return LLMChain(
         prompt_template=self,
