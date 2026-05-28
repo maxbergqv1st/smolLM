@@ -49,7 +49,7 @@ recipe_template = PromptTemplate(
 
 recipe_chain = recipe_template | llm
 
-result = recipe_chain.invoke(dish="Spagetti", ingredient_count="Five")
+result = recipe_chain.invoke(dish="Burrito", ingredient_count="Three")
 pprint(result)
 
 # pprint(llm.invoke("what is the capital of france"))
